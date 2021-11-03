@@ -1,0 +1,89 @@
+﻿@page "/register"
+@layout EmptyLayout
+    <Container>
+        <div class="d-flex justify-content-center">
+            <div class="register">
+                <h2 class="blue-text mb-3">Registrera användare</h2>
+
+                <p class="mb-3">
+                    Registrera en användare för att kunna logga in på Mina sidor.
+                </p>
+                <EditForm Model="@registerModel" OnSubmit="OnSubmit">
+                    <div class="d-flex mb-3">
+                        <InputText class="form-control large-form me-2" id="firstName" placeholder="Förnamn" @bind-Value="@registerModel.FirstName" />
+                        <InputText class="form-control large-form ms-2" id="lastName" placeholder="Efternamn" @bind-Value="@registerModel.LastName" />
+                    </div>
+                    <div class="d-flex mb-3">
+                        <InputText class="form-control large-form me-2" id="personId" placeholder="Personnummer" @bind-Value="@registerModel.Ssn" />
+                        <InputText class="form-control large-form ms-2" id="phoneNr" placeholder="Telefonnummer" @bind-Value="@registerModel.Phonenumber" />
+                    </div>
+                    <div class="d-flex mb-3">
+                        <InputText type="email" class="form-control large-form me-2" id="email" placeholder="E-postadress" @bind-Value="@registerModel.Email" />
+                        <div class="d-flex ms-2">
+
+
+                            <InputText type="password" class="form-control small-form me-2" id="password" placeholder="Lösenord" @bind-Value="@registerModel.Password" />
+                            <InputText type="password" class="form-control small-form ms-2" id="passwordConfirm" placeholder="Bekräfta lösenord" @bind-Value="@registerModel.PasswordConfirm" />
+                        </div>
+
+                    </div>
+                    <button class="register-btn" type="submit">Registrera</button>
+                    @if (DontMatch == true)
+                    {
+                        <div>Password´s Dont Match</div>
+                    }
+                    @if (EmailDontMatch == true)
+                    {
+                        <div> User with Email Already Exist</div>
+                    }
+
+                </EditForm>
+
+            </div>
+        </div>
+    </Container>
+    @code {
+        private UserRegisterModel registerModel { get; set; }
+        public bool DontMatch { get; set; }
+        private IEnumerable<UserModel> users { get; set; }
+        public bool EmailDontMatch { get; set; }
+
+
+        protected override void OnInitialized()
+        {
+            registerModel = new UserRegisterModel();
+            GetUsers().GetAwaiter();
+
+        }
+
+        private async Task GetUsers()
+        {
+            users = await Http.GetFromJsonAsync<IEnumerable<UserModel>>($"https://localhost:44343/api/Database/GetAllTarget?Target=User");
+        }
+
+
+        private async Task OnSubmit()
+        {
+            if (!users.Any(x => x.Email == registerModel.Email))
+            {
+                if (registerModel.Password == registerModel.PasswordConfirm)
+                {
+                    DontMatch = false;
+                    await Http.PostAsJsonAsync("https://localhost:44343/api/LoginRegister/Register", registerModel);
+                    NavManager.NavigateTo("/login");
+                }
+                else
+                {
+                    DontMatch = true;
+                }
+                EmailDontMatch = false;
+            }
+
+            else
+            {
+                EmailDontMatch = true;
+            }
+
+
+        }
+    }

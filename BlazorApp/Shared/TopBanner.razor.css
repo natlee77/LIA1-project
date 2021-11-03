@@ -1,0 +1,84 @@
+﻿* {
+    box-sizing: border-box;
+}
+
+html, body {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    line-height: 1.15;
+    margin: 0;
+    padding: 0;
+}
+
+/* ---------------------------------------------------------------------------------------------------- */
+/* banner */
+
+.banner {
+    background-color: #005a87;
+    height: 5rem;
+}
+
+.user {
+    margin-right: 2rem;
+}
+
+    .user i {
+        color: white;
+        font-size: 24px;
+        margin-right: 0.5rem;
+    }
+
+    .user a {
+        font-size: 18px;
+        text-decoration: none;
+        color: white;
+    }
+
+
+.dropbtn {
+    color: white;
+    font-size: 18px;
+    border: none;
+    cursor: pointer;
+    background-color: #005a87;
+    padding: 0;
+    height: 5rem;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+    background-color: #005a87;
+    height: 5rem;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #fafafa;
+    z-index: 1;
+    height: 4rem;
+    width: 100%;
+    right: 0;
+    bottom: -4rem;
+    border-bottom: solid 5px lightgray;
+    text-align: center;
+}
+
+    .dropdown-content a {
+        color: black;
+        text-decoration: none;
+        display: block;
+        height: 4rem;
+        padding-top: 1rem;
+    }
+
+        .dropdown-content a:hover {
+            background-color: #007cba;
+            color: white;
+            border-bottom: solid 5px lightgray;
+        }
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}

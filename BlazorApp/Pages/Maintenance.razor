@@ -1,0 +1,144 @@
+﻿@page "/maintenance"
+@inject HttpClient Http
+<Auth />
+ 
+    <h2 style=" color :#007cba;"> Ditt lägenhetsunderhåll</h2>
+
+    <h3> Hur gör jag om det är tid för underhåll?</h3>
+    <p>
+        Skriv en lista på vad som behöver göras i lägenheten, rum för rum.
+        Skriv även en lista för de gemensamma ytorna i huset, om du tycker att något behöver åtgärdas.
+        Till exempel tvättstugan.
+    </p>
+    <p> Om du planera att göra nån i en nyrenoverad lägenhet <span style="font-weight:bold; color:#005a87;">få tillstånd</span>  från hyresvärden   .</p>
+
+    <a class="link" href="/maintenance/renovation"><i class="fas fa-chevron-right"></i> Information om lägenhetsunderhåll</a><br />
+    <a class="link" href="/maintenance/rules"><i class="fas fa-chevron-right"></i> Frågor och svar</a>
+
+
+
+    <Column ColumnSize="ColumnSize.Is12.OnMobile.Is12.OnDesktop.Is12.OnTablet">
+        <div style=" background-color: #d8d8d8; padding: 1rem; margin-top:1rem;">
+
+            <Column ColumnSize="ColumnSize.Is12.OnMobile.Is12.OnDesktop.Is12.OnTablet">
+                <div class="ml-3" style="display: block; margin-top: 5px; height: auto; margin-bottom: 10px; font-size:27px">
+                    <span style=" color :#007cba;"> Lista på vad som behöver göras i lägenheten</span>
+                </div>
+
+                <EditForm Model="_maintanceModel" OnSubmit="@SubmitMaintanceAsync">
+                    <div style="margin-left:1rem;">
+                        <select class="form-select mb-3" aria-label="Default select example" required @bind="_maintanceOption">
+                            <option selected>Välj kategori</option>
+                            <option value="målning av väggar och tak">målning av väggar och tak</option>
+                            <option value="målning av snickerier">målning av snickerier</option>
+                            <option value="tapetsering av väggar">tapetsering av väggar</option>
+                            <option value="byte av plastmatta">byte av plastmatta</option>
+                            <option value="slipning av parkett">slipning av parkett</option>
+                            <option value="byte av vitvaror i köket">byte av vitvaror i köket</option>
+                            <option value="en droppande kran">en droppande kran</option>
+                        </select>
+                    </div>
+                    <ul  class="form mt-2">
+                        
+                        <li class="label mt-2">
+                            <label for="DescStorage" id="DescStorage" style="font-size:18px;  font-weight:bold">Övriga önskemål:</label>
+                        </li>
+                        <li class="value">
+                            <textarea name="DescStorage" @bind="@_maintanceModel.Description" rows="4"   aria-required="true"    style="width: 100%"></textarea>
+                        </li>
+                        
+                        <li class="value">    <span   class="forminfo-text"  >Fältet är begränsat till 255 tecken</span></li>
+
+                    </ul>
+
+                    <div class=" d-flex justify-content-end ">
+                      
+                        <button type="submit" class="btn submit-btn" style="padding: 0.5rem; width: 10rem; border: none; background-color: #007cba; color: white; border-radius: 50px; ">Spara</button>
+
+                    </div>
+                </EditForm>                
+            </Column>
+        </div>
+    </Column>
+
+
+    <div style="margin-top:2rem;">
+        <p> Kontakta hyresvärden - berätta vad du tycker ska göras, skicka över din lista.</p>
+        <p> Kom överens med värden om vilket underhåll som ska göra och när det ska vara klart. </p>
+        <p> Överenskommelsen ska helst vara skriftlig.</p>
+        <p> Om du inte kommer överens med värden, berätta att hen är bunden  av ett avtal.</p>
+        <p>Räcker inte det, så hör av dig till oss.</p>
+
+    </div>
+
+    <div style=" background-color: #d8d8d8; padding: 1rem; margin-top:1rem;  ">
+        <h3 style=" color :#007cba;"> Lägenhetunderhåll history </h3>
+        <div style="overflow-x:auto;">
+            <table class="grid" style="border-width:0px;width:100%; margin-top:1rem; ">
+                <tbody>
+                    <tr class="header_history " style="background-color:#007cba; color:white; padding:1rem; padding:10px;column-width:auto">
+
+                        <td class="col-1 ">Datum</td>
+                        <td>Vad gjordes</td>
+                        <td>Status</td>
+                    </tr>
+                    @if (_maintanceModels.Count == 0)
+                    {
+                        <tr class="header_history " style="background-color:#007cba; color:white; padding:1rem; padding:10px;">
+                            <td> Empty </td>
+                        </tr>
+                    }
+
+                    @foreach (var item in _maintanceModels)
+                    {
+                        <tr class="list_history  " style="margin-top:1rem; border-bottom:2px solid white">
+
+                            <td>@item.ErrorDate</td>
+                            <td>@item.Description</td>
+                            <td>@item.Status</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+ 
+
+@code {
+    private MaintanceModel _maintanceModel;
+    private List<MaintanceModel> _maintanceModels = new List<MaintanceModel>();
+    private string _maintanceOption { get; set; }
+
+
+    private async Task SubmitMaintanceAsync()
+    {
+        _maintanceModel.ErrorDate = DateTime.Now;
+        var _userIdString = await sessionStorage.GetItemAsync<string>("UserId");
+        int _userId = Int32.Parse(_userIdString);
+        _maintanceModel.UserId = _userId;
+        if (_maintanceOption.Any())
+        {
+            _maintanceModel.Description =_maintanceOption + " : " + _maintanceModel.Description;
+        }
+        _maintanceModel.Status = "New";
+
+        await Http.PostAsJsonAsync<MaintanceModel>("https://localhost:44343/api/Database/CreateMaintenance", _maintanceModel);
+
+        _maintanceModel.Description = "";
+        await GetMaintenanceByUserAsync();
+    }
+
+    //https://localhost:44343/api/Database/GetMaintenanceByUserId?UserId=5
+
+    private async Task GetMaintenanceByUserAsync()
+    {
+        var _userId = await sessionStorage.GetItemAsync<string>("UserId");
+        _maintanceModels = await Http.GetFromJsonAsync<List<MaintanceModel>>($"https://localhost:44343/api/Database/GetMaintenanceByUserId?UserId={_userId}");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _maintanceModel = new MaintanceModel();
+        await GetMaintenanceByUserAsync();
+    }
+}

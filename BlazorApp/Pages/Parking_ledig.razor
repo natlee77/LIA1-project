@@ -1,0 +1,550 @@
+﻿@page "/parking"
+
+@inject IParkingService ParkingService
+@inject NavigationManager NavManager
+@inject ILocalStorageService LocalStorage
+
+<Auth />
+
+ 
+     
+        <Container>            
+             <div>
+                    <div class="column alignleft " style="height: auto;">
+                        <h2 style="color:#005a87;">Lediga parkeringsplatser</h2>
+                        <p class="ingress">
+                            Välj adress eller parkering typ i sökfältet nedan för att visa lediga bilplatser.
+                            Välja önskad bill parkering plats , tryck hyra plats , då ska du underskriva avtal av hyra bil parkering plats om  1 år och ska få facktura from idags datum.
+                            För att göra det, måste du först registrera dig , det gör du enkelt under Mina sidor.
+                        </p>
+                    </div>
+
+                    <div style="background-color: #d8d8d8;  margin-top:1rem; ">
+
+                        <!--------------------filter-->
+                        <div style="margin-top:1rem;margin-left:0">
+                            <!---- filter By aria-- -->
+                             
+                                 <ul >
+                                      <li>
+                                            <span style="color: #007cba;font-size:20px;font-weight:bold; margin-top:1rem;">Stad:</span>
+
+                                            <Table>
+                                                <TableBody>
+                                                    <RadioGroup Class=" mе-1" TValue="string" Name="City" CheckedValue="@myValue" CheckedValueChanged="@OnCheckedValueChanged">
+                                                        <TableRow Style="border-bottom:none">
+                                                            <TableRowCell>
+                                                                <Radio TValue="string" Value="@("Oslo")">
+                                                                    Oslo   <a href="" class="icon-areainfo iframe"><i class="fa fa-info-circle" title="Läs mer"></i></a>
+                                                                </Radio>
+                                                            </TableRowCell>
+                                                            <TableRowCell>
+                                                                <Radio TValue="string" Value="@("Örebro")" Style=" margin-left:1rem">
+                                                                    Örebro   <a href="" class="icon-areainfo iframe"><i class="fa fa-info-circle" title="Läs mer"></i></a>
+                                                                </Radio>
+                                                            </TableRowCell>
+                                                            <TableRowCell>
+                                                                <Radio TValue="string" Value="@("Lomma")" Style=" margin-left:1rem">
+                                                                    Lomma  <a href="" class="icon-areainfo iframe"><i class="fa fa-info-circle" title="Läs mer"></i></a>
+                                                                </Radio>
+                                                            </TableRowCell>
+                                                        </TableRow>
+                                                        <TableRow Style="border-bottom:none">
+                                                            <TableRowCell>
+                                                                <Radio TValue="string" Value="@("Karlskoga")">
+                                                                    Karlskoga
+                                                                    <a href="" class="icon-areainfo iframe"><i class="fa fa-info-circle" title="Läs mer"></i></a>
+                                                                </Radio>
+                                                            </TableRowCell>
+                                                            <TableRowCell>
+                                                                <Radio TValue="string" Value="@("Degerfors")" Style=" margin-left:1rem">
+                                                                    Degerfors
+                                                                    <a href="" class="icon-areainfo iframe"><i class="fa fa-info-circle" title="Läs mer"></i></a>
+                                                                </Radio>
+                                                            </TableRowCell>
+                                                            <TableRowCell>
+                                                                <Radio TValue="string" Value="@("Karlstad")" Style=" margin-left:1rem">
+                                                                    Karlstad
+                                                                    <a href="" class="icon-areainfo iframe"><i class="fa fa-info-circle" title="Läs mer"></i></a>
+                                                                </Radio>
+                                                            </TableRowCell>
+
+                                                        </TableRow>
+                                                    </RadioGroup>
+                                                    <TableRow Style="border-bottom:none">
+                                                        <Row >
+                                                            <div class="d-flex justify-content-start ">
+                                                                <p>Filtrera parkering plats för stad: <span style="font-weight:bold; color:#005a87; margin-right:2rem;">@myValue</span></p>
+                                                                <Button @onclick="@(() => SearchByCity())" class="btnsbp btn-sm border ml-2 " style="width: 20%;  background-color: #007cba; color: white;"> Filtrera</Button>
+                                                            </div>
+                                                        </Row>
+                                                    </TableRow>
+                                                </TableBody>
+                                            </Table>
+                                      </li>
+                                 </ul>
+                           
+
+                            <!--filter by  pris-->
+                            <ul >
+                                    <li>
+
+                                        <div>
+                                            <span class="title" style="color: #007cba;font-size:20px;font-weight:bold">Price:</span>
+                                            <span> 0 - 1000</span>
+                                            <div class="d-flex justify-content-between mt-2">
+                                                <span class="minValue">Min</span>
+                                                <span style="align-items:end; margin-right:2rem;" class="maxValue ">Max</span>
+                                            </div>
+                                            <Tooltip Text="@SliderValue.ToString()" Placement="Placement.Top">
+                                                <input type="range"
+                                                       min="0"
+                                                       max="1000"
+                                                       step="50"
+                                                       class="slider"
+                                                       id="myRange"
+                                                       @bind="SliderValue"
+                                                       @bind:event="oninput"
+                                                       style="width:97%; background:white; margin-top:1rem; margin-right:2rem;">
+                                            </Tooltip>
+                                        </div>
+                                        <div class="d-flex justify-content-end">
+                                            <Button @onclick="@(()=>SearchByPrice())" Class="btnsbp btn-sm border mr-2" Style="width: 20%; background-color: #007cba; color: white; margin-right:2rem;"> Filtrera</Button>
+
+                                        </div>
+                                    </li>
+                                </ul>
+                       
+                           
+                        </div>
+
+
+                        <!--............................By adress line  || Parking Type -->
+                        <Column ColumnSize="ColumnSize.Is12" >
+                           
+                                <Row Style="padding-left:1rem; padding-right:1rem;padding-bottom:1rem">
+                                    <Column ColumnSize="ColumnSize.Is6">
+                                        <span>Välj adress:</span>   
+                                            <Row>
+                                                 <select class="form-control" @bind="@SelectedAdress" style="width:80%; height:34px">
+                                                      <option selected="selected" value="">Visa alla</option>
+
+                                                        @if (ParkingTypeList == null)
+                                                        {
+                                                            <Paragraph> No found </Paragraph>
+                                                        }
+                                                        else
+                                                        {
+                                                            @foreach (var adress in ParkingTypeList)
+                                                            {
+                                                                <option value="@adress.Id"> @adress.ParkingLotsNavigation.Address </option>
+                                                            }
+                                                        }
+                                                    </select>
+                                                    <Button @onclick="AddCartAdress" class="btn add-btn" style="width: 20%; background-color: #007cba; color: white;">Add</Button>
+                                                </Row>
+                                             
+                                       
+                                    </Column>
+
+                                    <Column ColumnSize="ColumnSize.Is6">
+                                        <span>Parkering typ:</span>testar
+                                       
+                                           
+                                                <Row>
+                                                    <select class="form-control" @bind="@SelectedParkingType" style="width:80%; height:34px">
+                                                        <option selected="selected" value=""> Visa alla          </option>
+                                                        <option value="Garage/Carport "> Garage/Carport     </option>
+                                                        <option value="Husvagnsplats "> Husvagnsplats      </option>
+                                                        <option value="Parkering "> Parkering          </option>
+                                                        <option value="Handikappsplats "> Handikappsplats    </option>
+                                                        <option value="MC-garage/parkering"> MC-garage/parkering</option>
+                                                        <option value="Parkering med el"> Parkering med el   </option>
+                                                    </select>
+                                                    <Button @onclick="AddCart" class="btn add-btn " style="width:20%; background-color: #007cba; color: white;">Add</Button>
+                                                </Row>
+                                          
+                                         
+                                    </Column>
+                                </Row>
+                            
+                        </Column>
+                        <!-------------- list av free parking place i Table-->
+                        <Column ColumnSize="ColumnSize.Is12.OnMobile.Is12.OnDesktop.Is12.OnTablet" Style="background-color: white ">
+                            <div style="overflow-x:auto;">
+                                <Table Style="border-width:0px;width:100%;  margin-top: 1rem;">
+                                    <TableHeader Style="background-color: #007cba; color:white ; padding-top:10px; padding-bottom:10px;">
+                                        <TableRow>   </TableRow>
+                                            <TableRow>
+                                                <TableHeaderCell> Nr      </TableHeaderCell>
+                                                <TableHeaderCell> Adress  </TableHeaderCell>
+                                                <TableHeaderCell> Parkering Typ     </TableHeaderCell>
+                                                <TableHeaderCell> Price   </TableHeaderCell>
+                                                <TableHeaderCell> Free    </TableHeaderCell>
+                                                <TableHeaderCell> St.</TableHeaderCell>
+                                                <TableHeaderCell> Stad    </TableHeaderCell>
+                                                <TableHeaderCell>         </TableHeaderCell>
+                                                <TableHeaderCell>         </TableHeaderCell>
+                                            </TableRow>
+                                    </TableHeader>
+
+                                    <TableBody Style=" background-color: white">
+                                        @if (adressCartList == null)
+                                        {
+                                            <TableRow> <span>You have no items in your cart.</span>  </TableRow>                                            
+                                        }
+                                        else
+                                        {
+                                            @foreach (var item in GetAdressesByPage(CurrentPage))
+                                            {
+                                                <TableRow>
+                                                    <TableRowCell> @item.ParkingCategoryId</TableRowCell>
+                                                    <TableRowCell> @item.Address          </TableRowCell>
+                                                    <TableRowCell> @item.ParkingCategory1 </TableRowCell>
+                                                    <TableRowCell> $@item.Price           </TableRowCell>
+                                                    <TableRowCell> @item.AvailableLots    </TableRowCell>
+                                                    <TableRowCell>  1                     </TableRowCell>
+                                                    <TableRowCell> @item.City             </TableRowCell>
+                                                    <TableRowCell>
+                                                        <Button @onclick="@(() => AddToDbContract(item))" class="btn" style="background-color: #007cba; color:white;">Hyra plats</Button>
+                                                    </TableRowCell>
+                                                    <TableRowCell>
+                                                        <Button class="btn" @onclick="() => RemoveCart(item)"><i class="fas fa-trash-alt"></i></Button>
+                                                    </TableRowCell>
+                                                </TableRow>
+                                            }
+                                        }
+                                    </TableBody>
+                                </Table>
+
+
+
+                                <!------------Page navigaring-->
+
+                                <Row>
+                                    <nav id="Page-navigation" style="display: flex; justify-content: center; ">
+                                        <ul class="pagination align-items-center">
+                                            <li class="page-item">
+                                                <button class="page-link border-0" href="#parking-sida1 " aria-label="Previous" @onclick="@(() => OnPageChange(CurrentPage - 1))">
+                                                    <span aria-hidden="true"><img src="./img/Prev btn.svg" alt="" class="prev-button"></span>
+                                                </button>
+                                            </li>
+                                             
+                                                @for (int pageIndex = 0; pageIndex <= CalcMaxPages(); pageIndex++)
+                                                {
+                                                    var pageNumber = pageIndex;
+
+                                                    <li class="page-item   d-sm-flex">
+                                                        <button class="page-link border-0" @onclick="@(() => OnPageChange(pageNumber))">
+                                                            @(pageIndex + 1)
+                                                        </button>
+                                                    </li>
+                                                }
+                                            
+
+                                            <li class="page-item">
+                                                <button class="page-link border-0" href="#" aria-label="Next" @onclick="@(() => OnPageChange(CurrentPage + 1))">
+                                                    <span aria-hidden="true"><img src="./img/Next btn.svg" class="next-button" alt=""></span>
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </Row>
+
+                            </div>
+                        </Column>
+                    </div>
+
+
+                    <span style="color:darkred; font-weight:bold;margin-top:1rem; margin-right:1rem">@OrderPlacementResult</span>
+
+                    <!----------------Pop upp window if contract placed -->
+                    <Modal @ref="ConfirmationModal" Style="background-color: rgba(14, 21, 61, 0.85)">
+                        <ModalContent IsCentered="true" Size="ModalSize.ExtraLarge">
+                            <ModalBody>
+                                <Container>
+                                    <h1>Your Parking Contract created!</h1>
+                                    <h1>Thank you for to be  with us!</h1>
+                                </Container>
+                            </ModalBody>
+                        </ModalContent>
+                    </Modal>
+
+
+                    <!--------------Annons-->
+                    <Row Class=" mt-5">
+                        <Column>
+                            <div style="height: 218px;">
+                                <h2 style="display:block;color:#005a87;">Moms vid hyra av bilplats</h2>
+                                <p class="ingress"></p>
+                                <p>Vid hyra av bilplats kan moms (f.n. 25%) tillkomma i vissa fall enligt mervärdeskattelagen. Contract gäller 1 år </p>
+                                <p><a href="/contact ">Vid frågor kontakta ditt ortskontor</a></p>
+
+                            </div>
+                        </Column>
+                        <Column>
+                            <div style="height: 218px;">
+                                <h2 style="display:block;color:#005a87;">Parkering i våra områden</h2>
+                                <p class="ingress"></p>
+                                <p>I våra områden hyrs parkering- och garageplatser ibland genom vår egen kö och ibland via externa parkeringsbolag. För att ta &nbsp;reda på vad som gäller i just ditt område vänligen kontakta ditt ortskontor.</p>
+                                <p><a href="/contact ">Kontakta ditt ortskontor</a></p>
+
+                            </div>
+                        </Column>
+                    </Row>
+                </div>
+             
+        </Container>
+     
+ 
+
+
+@code {
+    private ParkingCategoryModel parkingplats { get; set; } = new ParkingCategoryModel();
+    public AdressCartModel adressToCart { get; set; } = new AdressCartModel();
+    public AdressModel Lot { get; set; } = new AdressModel();
+    public string customerId { get; set; }
+    string selectedAdress;
+    public string SelectedAdress { get => selectedAdress; set { selectedAdress = value; } }
+    string selectedParkingType;
+    public string SelectedParkingType { get => selectedParkingType; set { selectedParkingType = value; } }
+    private IEnumerable<ParkingCategoryModel> ParkingTypeList { get; set; } = new List<ParkingCategoryModel>();
+    private List<AdressCartModel> adressCartList { get; set; } = new List<AdressCartModel>();
+
+    private async Task GetAdressesAsync()
+    {
+        ParkingTypeList = await Http.GetFromJsonAsync<IEnumerable<ParkingCategoryModel>>("https://localhost:44343/api/ParkingCategories");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        customerId = await sessionStorage.GetItemAsync<string>("UserId");
+        adressCartList = await LocalStorage.GetItemAsync<List<AdressCartModel>>("ParkingCart");
+        ParkingService.OnChange += StateHasChanged;
+        await GetAdressesAsync();
+    }
+
+    private async Task AddCart()
+    {
+        string plats = selectedParkingType;
+        var adressCartList = await ParkingService.GetParkingPlatsByTypeAsync(plats);
+
+        if (adressCartList != null)
+        {
+            foreach (var item in adressCartList)
+            {
+                if (item.ParkingLotsNavigation.AvailableLots != 0)
+                {
+                    AdressCartModel adressToCart = new AdressCartModel()
+                    {
+
+                        Address = item.ParkingLotsNavigation.Address,
+                        City = item.ParkingLotsNavigation.City,
+                        LotNumber = item.ParkingLotsNavigation.Id,
+                        AvailableLots = item.ParkingLotsNavigation.AvailableLots,
+                        Price = item.Price,
+                        ParkingCategory1 = item.ParkingCategory1,
+                        ParkingCategoryId = item.Id,
+                        UserId = Int32.Parse(customerId),
+                        QuantityByUser = 1
+
+                    };
+
+                    await ParkingService.AddToCartAdress(adressToCart);
+                }
+
+            }
+        }
+        else
+        { }
+        NavManager.NavigateTo("/parking", forceLoad: true);
+    }
+
+    private async Task AddCartAdress()
+    {
+        int id = Int32.Parse(SelectedAdress);
+        var adress = await ParkingService.GetParkingByIdAsync(id);
+        if (adress.ParkingLotsNavigation.AvailableLots != 0)
+        {
+            AdressCartModel adressToCart = new AdressCartModel()
+            {
+                Address = adress.ParkingLotsNavigation.Address,
+                City = adress.ParkingLotsNavigation.City,
+                LotNumber = adress.ParkingLotsNavigation.Id,
+                AvailableLots = adress.ParkingLotsNavigation.AvailableLots,
+                Price = adress.Price,
+                ParkingCategory1 = adress.ParkingCategory1,
+                ParkingCategoryId = adress.Id,
+                UserId = Int32.Parse(customerId),
+                QuantityByUser = 1
+            };
+            await ParkingService.AddToCartAdress(adressToCart);
+        }
+        else
+        {         //     "Har inte free parking plats in den adress";
+        }
+        NavManager.NavigateTo("/parking", forceLoad: true);
+    }
+
+
+    private async Task RemoveCart(AdressCartModel model)
+    {
+        await ParkingService.DeleteItem(model);
+        adressCartList.Remove(model);
+    }
+
+    private async Task AddToDbContract(AdressCartModel contract)
+    {
+        var accessToken = await sessionStorage.GetItemAsync<string>("AccessToken");
+
+        if ((accessToken != null) & (contract.ParkingCategoryId != 0))
+        {
+            var result = await ParkingService.PlaceContract(contract);
+            if (result.Succeeded)
+            {
+                ShowConfirmationModal();
+
+                //delete 1 lot from availableLots  i DB ParkingLot table
+                var parkingLot = await ParkingService.GetAdressByIdAsync(contract.LotNumber);
+                if (parkingLot != null & contract.LotNumber != 0)
+                {
+                    int id = contract.LotNumber;
+                    AdressModel updateLot = new AdressModel
+                    {
+                        Id = parkingLot.Id,
+                        Address = parkingLot.Address,
+                        AvailableLots = parkingLot.AvailableLots - 1,
+                        City = parkingLot.City,
+                        TotalLots = parkingLot.TotalLots
+
+                    };
+                    await Http.PutAsJsonAsync<AdressModel>($"https://localhost:44343/api/ParkingLots/{id}", updateLot);
+                }
+
+                //delete object from localStorage
+                await ParkingService.DeleteItem(contract);
+                adressCartList.Remove(contract);
+            }
+            else
+            {
+                OrderPlacementResult = result.Message;
+            }
+        }
+        else
+        {
+            NavManager.NavigateTo("/login");
+        }
+    }
+
+    //-------------------search by City i Database
+    string myValue = "Inte Vald";
+    void OnCheckedValueChanged(string value)
+    {
+        myValue = value;
+    }
+    private async Task SearchByCity()
+    {
+        string city = myValue;
+        var adressCartList = await ParkingService.GetParkingPlatsByCityAsync(city);
+
+        if (adressCartList != null)
+        {
+            foreach (var item in adressCartList)
+            {
+                if ((item.ParkingLotsNavigation.AvailableLots != 0) || (city != null))
+                {
+                    AdressCartModel adressToCart = new AdressCartModel()
+                    {
+
+                        Address = item.ParkingLotsNavigation.Address,
+                        City = item.ParkingLotsNavigation.City,
+                        LotNumber = item.ParkingLotsNavigation.Id,
+                        AvailableLots = item.ParkingLotsNavigation.AvailableLots,
+                        Price = item.Price,
+                        ParkingCategory1 = item.ParkingCategory1,
+                        ParkingCategoryId = item.Id,
+                        UserId = Int32.Parse(customerId),
+                        QuantityByUser = 1
+
+                    };
+
+                    await ParkingService.AddToCartAdress(adressToCart);
+                }
+            }
+        }
+        else
+        { }
+        NavManager.NavigateTo("/parking", forceLoad: true);
+    }
+
+    private string OrderPlacementResult;
+    private Modal ConfirmationModal;
+    private void ShowConfirmationModal()
+    {
+        ConfirmationModal.Show();
+    }
+    //--------------------------filter by price
+    decimal SliderValue;
+    private async Task SearchByPrice()
+    {
+        var itemsList = await LocalStorage.GetItemAsync<List<AdressCartModel>>("ParkingCart");
+        decimal myprice = SliderValue;//400
+        if (myprice !=0)
+        {
+            foreach (var item in itemsList)
+            {
+                var LS_price = item.Price;  //410
+                Console.WriteLine(LS_price);
+                if (LS_price > myprice) //410>400
+                {
+                    await ParkingService.DeleteItem(item);
+                    adressCartList.Remove(item);
+                }
+            }
+        }
+        NavManager.NavigateTo("/parking", forceLoad: true);
+    }
+
+
+    private void HideConfirmationModal()
+    {
+        ConfirmationModal.Hide();
+    }
+
+    //Pagination
+    private int maxShownPerPage = 6;
+    private int CurrentPage = 1;
+
+    protected int CalcMaxPages()
+    {
+        if (adressCartList  != null)
+        {
+            return (adressCartList.Count() / maxShownPerPage);
+        }
+        else
+        {
+            return 1;
+        }
+
+    }
+    //Checks if new index(PageNumber) resulting from clicking the previous or next page button doesn't go over CalcMaxPages or is below 0, saves new page index to CurrentPage then runs GetProductsByPage
+    private void OnPageChange(int page)
+    {
+        if (page >= 0 && page <= CalcMaxPages())
+        {
+            CurrentPage = page;
+            GetAdressesByPage(CurrentPage);
+        }
+        else
+        {
+            GetAdressesByPage(1);
+        }
+    }
+    protected IEnumerable<AdressCartModel> GetAdressesByPage(int page)
+    {
+        return adressCartList.Skip(maxShownPerPage * page).Take(maxShownPerPage);
+    }
+    //Pagination end
+
+
+}

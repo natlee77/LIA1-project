@@ -1,0 +1,192 @@
+﻿@page "/mycontracts"
+
+<Auth />
+<Container>
+    <Column ColumnSize="ColumnSize.Is12">
+        <h2 class="mb-5 blue-text">Mina avtal</h2>
+
+        <h3 class="mb-3">Lägenhet</h3>
+
+        @if (_contractsApartment.Count == 0)
+        {
+            <p>Du har inga lägenhetsavtal</p>
+        }
+        else
+        {
+            @foreach (var _contractApartment in _contractsApartment)
+            {
+                <div class="contract d-flex justify-content-between align-items-center">
+                    <div class="d-flex">
+                        <div class="me-5">
+                            <p class="gray-text mb-1">Adress</p>
+                            <p class="gray-text bold-text mt-1">@_contractApartment.Address</p>
+                        </div>
+                        <div class="ms-5 me-5">
+                            <p class="gray-text mb-1">Lägenhetsnummer</p>
+                            <p class="gray-text bold-text mt-1">@_contractApartment.ApartmentNumber</p>
+                        </div>
+                        <div class="ms-5">
+                            <p class="gray-text mb-1">Hyra</p>
+                            <p class="gray-text bold-text mt-1">@_contractApartment.Price kr/mån</p>
+                        </div>
+                        <div class="ms-5 me-5">
+                            <p class="gray-text mb-1">Startdatum</p>
+                            <p class="gray-text bold-text mt-1">@_contractApartment.StartDate</p>
+                        </div>
+                    </div>
+                    <div class="d-flex">
+                        <button type="button" class="contract-btn me-3" data-bs-toggle="modal" data-bs-target="#cancelApartmentModal-@_contractApartment.Id">Säg upp</button>
+                        <button type="button" class="contract-btn" data-bs-toggle="modal" data-bs-target="#contractModal">Detaljer</button>
+                    </div>
+                </div>
+
+                <!-- Cancel Apartment Modal -->
+                <div class="modal fade" id="cancelApartmentModal-@_contractApartment.Id" tabindex="-1" aria-labelledby="cancelApartmentModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3 class="modal-title blue-text">Säg upp</h3>
+                            </div>
+                            <div class="modal-body">
+                                <p>Är du säker på att du vill säga upp det här avtalet?</p>
+                            </div>
+                            <div class="modal-footer d-flex">
+                                <button type="button" class="modal-btn" data-bs-toggle="modal" data-bs-target="#confirmationModal" data-bs-dismiss="modal" @onclick="() => CancelApartmentAsync(_contractApartment.Id)">Ja</button>
+                                <button type="button" class="modal-btn" data-bs-dismiss="modal">Nej</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+
+        <h3 class="mt-5 mb-3">Parkering</h3>
+
+        @if (_contractsParking.Count == 0)
+        {
+            <p>Du har inga parkeringsavtal</p>
+        }
+        else
+        {
+            @foreach (var _contractParking in _contractsParking)
+            {
+                <div class="contract d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex">
+                        <div class="me-5">
+                            <p class="gray-text mb-1">Adress</p>
+                            <p class="gray-text bold-text mt-1">@_contractParking.Address</p>
+                        </div>
+                        <div class="ms-5 me-5">
+                            <p class="gray-text mb-1">Platsnummer</p>
+                            <p class="gray-text bold-text mt-1">@_contractParking.LotNumber</p>
+                        </div>
+                        <div class="ms-5 me-5">
+                            <p class="gray-text mb-1">Hyra</p>
+                            <p class="gray-text bold-text mt-1">@_contractParking.Price kr/mån</p>
+                        </div>
+                        <div class="ms-5 me-5">
+                            <p class="gray-text mb-1">Startdatum</p>
+                            <p class="gray-text bold-text mt-1">@_contractParking.StartDate</p>
+                        </div>
+                    </div>
+                    <div class="d-flex">
+                        <button type="button" class="contract-btn me-3" data-bs-toggle="modal" data-bs-target="#cancelParkingModal-@_contractParking.Id">Säg upp</button>
+                        <button type="button" class="contract-btn" data-bs-toggle="modal" data-bs-target="#contractModal">Detaljer</button>
+                    </div>
+                </div>
+
+                <!-- Cancel Parking Modal -->
+                <div class="modal fade" id="cancelParkingModal-@_contractParking.Id" tabindex="-1" aria-labelledby="cancelParkingModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3 class="modal-title blue-text">Säg upp</h3>
+                            </div>
+                            <div class="modal-body">
+                                <p>Är du säker på att du vill säga upp det här avtalet?</p>
+                            </div>
+                            <div class="modal-footer d-flex">
+                                <button type="button" class="modal-btn" data-bs-toggle="modal" data-bs-target="#confirmationModal" data-bs-dismiss="modal" @onclick="() => CancelParkingAsync(_contractParking.Id)">Ja</button>
+                                <button type="button" class="modal-btn" data-bs-dismiss="modal">Nej</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+
+        <!-- Contract Modal -->
+        <div class="modal fade" id="contractModal" tabindex="-1" aria-labelledby="contractModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title blue-text">Detaljer</h3>
+                    </div>
+                    <div class="modal-body" style="height:30rem">
+                        <embed src="pdf/example.pdf" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="modal-btn" data-bs-dismiss="modal">Stäng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirmation Modal -->
+        <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title blue-text">Avtalet uppsagt</h3>
+                    </div>
+                    <div class="modal-body">
+                        <p>Avtalet har sagts upp. Hyresvärden kommer att kontakta dig.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="modal-btn" data-bs-dismiss="modal">Stäng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </Column>
+</Container>
+@code {
+    private ContractApartmentModel _contractApartment;
+    private ContractParkingModel _contractParking;
+    private List<ContractApartmentModel> _contractsApartment = new List<ContractApartmentModel>();
+    private List<ContractParkingModel> _contractsParking = new List<ContractParkingModel>();
+
+    private async Task GetApartmentContractsAsync()
+    {
+        var _userId = await sessionStorage.GetItemAsync<string>("UserId");
+        _contractsApartment = await Http.GetFromJsonAsync<List<ContractApartmentModel>>($"https://localhost:44343/api/ContractApartments/User/{_userId}");
+        _contractsApartment.Reverse();
+    }
+
+    private async Task GetParkingContractsAsync()
+    {
+        var _userId = await sessionStorage.GetItemAsync<string>("UserId");
+        _contractsParking = await Http.GetFromJsonAsync<List<ContractParkingModel>>($"https://localhost:44343/api/ContractParkings/User/{_userId}");
+        _contractsParking.Reverse();
+    }
+
+    private async Task CancelApartmentAsync(int Id)
+    {
+        await Http.DeleteAsync($"https://localhost:44343/api/ContractApartments/{Id}");
+        await GetApartmentContractsAsync();
+    }
+
+    private async Task CancelParkingAsync(int Id)
+    {
+        await Http.DeleteAsync($"https://localhost:44343/api/ContractParkings/{Id}");
+        await GetParkingContractsAsync();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _contractApartment = new ContractApartmentModel();
+        _contractParking = new ContractParkingModel();
+        await GetApartmentContractsAsync();
+        await GetParkingContractsAsync();
+    }
+}

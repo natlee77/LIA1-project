@@ -1,0 +1,13 @@
+﻿body {
+}
+.blue-text {
+    color: #007cba;
+}
+.blue-text:hover {
+    text-decoration: underline;
+}
+
+.d-flex {
+    background-color: #d8d8d8;
+    padding: 1rem;
+}

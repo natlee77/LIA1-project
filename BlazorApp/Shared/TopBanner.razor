@@ -1,0 +1,38 @@
+﻿@inject HttpClient Http
+
+<nav class="banner d-flex align-items-center justify-content-end">
+    <div class="user d-flex align-items-center">
+        <div class="dropdown d-flex align-items-center">
+            <i class="fas fa-user-circle"></i>
+            <button class="dropbtn">@_userModel.FirstName @_userModel.LastName</button>
+            <div class="dropdown-content">
+                <a href="/logout">Logga ut</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+@code {
+    private UserModel _userModel;
+
+    private async Task GetUserAsync()
+    {
+        var _userId = await sessionStorage.GetItemAsync<string>("UserId");
+
+        if (_userId != null)
+        {
+            var userId = Int32.Parse(_userId);
+            _userModel = await Http.GetFromJsonAsync<UserModel>($"https://localhost:44343/api/Users/{userId}");
+        }
+        else
+        {
+            NavManager.NavigateTo("/login");
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _userModel = new UserModel();
+        await GetUserAsync();
+    }
+}

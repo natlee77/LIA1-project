@@ -1,0 +1,74 @@
+﻿@page "/"
+@inject HttpClient Http
+
+<Auth />
+
+<Container>
+    <div class="index-section1 d-flex justify-content-center">
+        <div>
+            <h2 class="grat mt-2" >Välkommen, @_userModel.FirstName @_userModel.LastName!</h2>
+            <h5 class="  mt-4 mb-5 text-center">Kort informations text här</h5>
+        </div>
+    </div>
+    <div class="index-section2">
+        <div class="d-flex">
+            <div class="mt-5 col-6 pe-2">
+                <h2 class="blue-text mb-3">Viktiga meddelanden</h2>
+                <p class="gray-text">Du har inga meddelanden just nu..</p>
+            </div>
+            <div class="mt-5 col-6 ps-2">
+                <h2 class="blue-text mb-3">Senaste från anslagstavlan</h2>
+                @if (_userMessages.Count == 0)
+                {
+                    <p>Det finns inga meddelanden på anslagstavlan</p>
+                }
+                else
+                {
+                    @foreach (var _userMessage in _userMessages.GetRange(0, 3))
+                    {
+                        <div class="message">
+                            <div class="d-flex pt-2 pb-2">
+                                <p class="blue-text bold-text me-2">@_userMessage.MessageDate</p>
+                                <p class="bold-text">@_userMessage.Title</p>
+                            </div>
+                            <p class="gray-text pb-2">@_userMessage.Message</p>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+    </div>   
+</Container>
+@code {
+    private UserModel _userModel = new UserModel();
+    private List<UserMessageModel> _userMessages = new List<UserMessageModel>();
+
+    private async Task GetUserAsync()
+    {
+        var _userId = await sessionStorage.GetItemAsync<string>("UserId");
+
+        if (_userId != null)
+        {
+            var userId = Int32.Parse(_userId);
+            _userModel = await Http.GetFromJsonAsync<UserModel>($"https://localhost:44343/api/Users/{userId}");
+        }
+        else
+        {
+            NavManager.NavigateTo("/login");
+        }
+    }
+
+    private async Task GetMessagesAsync()
+    {
+        _userMessages = await Http.GetFromJsonAsync<List<UserMessageModel>>("https://localhost:44343/api/UserMessages");
+        _userMessages.Reverse();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetUserAsync();
+        await GetMessagesAsync();
+    }
+}
+

@@ -1,0 +1,74 @@
+﻿@page "/messageboard"
+
+<Auth />
+<Container> 
+<h2 class="mb-5 blue-text">Anslagstavlan</h2>
+
+<button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#messageModal">Nytt inlägg</button>
+<div class="gray-border mt-4"></div>
+
+@if (_userMessages.Count == 0)
+{
+    <p>Det finns inga meddelanden på anslagstavlan</p>
+}
+else
+{
+    @foreach (var _userMessage in _userMessages)
+    {
+        <div class="message">
+            <div class="d-flex pt-2 pb-2">
+                <p class="blue-text bold-text me-2">@_userMessage.MessageDate</p>
+                <p class="bold-text">@_userMessage.Title</p>
+            </div>
+            <p class="gray-text pb-2">@_userMessage.Message</p>
+        </div>
+    }
+
+    <!-- Modal -->
+    <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <EditForm Model="@_userMessage" OnSubmit="@SubmitMessageAsync">
+                    <div class="modal-header">
+                        <h3 class="modal-title blue-text">Gör ett nytt inlägg</h3>
+                    </div>
+                    <div class="modal-body">
+                        <input class="form-control mb-2" type="text" placeholder="Titel" aria-label="default input example" @bind="_userMessage.Title">
+                        <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" placeholder="Meddelande" @bind="_userMessage.Message"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="modal-btn" data-bs-dismiss="modal">Avbryt</button>
+                        <button type="submit" class="modal-btn">Publicera</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+}
+</Container>
+@code {
+    private UserMessageModel _userMessage;
+    private List<UserMessageModel> _userMessages = new List<UserMessageModel>();
+
+    private async Task SubmitMessageAsync()
+    {
+        _userMessage.MessageDate = DateTime.Now;
+        //UserId tillfälligt hårdkodat
+        _userMessage.UserId = 4;
+        await Http.PostAsJsonAsync<UserMessageModel>("https://localhost:44343/api/UserMessages", _userMessage);
+        await GetMessagesAsync();
+        _userMessage = new UserMessageModel();
+    }
+
+    private async Task GetMessagesAsync()
+    {
+        _userMessages = await Http.GetFromJsonAsync<List<UserMessageModel>>("https://localhost:44343/api/UserMessages");
+        _userMessages.Reverse();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _userMessage = new UserMessageModel();
+        await GetMessagesAsync();
+    }
+}

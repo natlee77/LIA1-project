@@ -1,0 +1,74 @@
+﻿@page "/maintenance/renovation"
+
+<Auth />
+
+<Container>
+    <Column ColumnSize="ColumnSize.Is8.OnMobile.Is8.OnDesktop.Is8.OnTablet">
+        <Column ColumnSize="ColumnSize.Is10.OnMobile.Is10.OnDesktop.Is10.OnTablet">
+            <h3 style="color:#005a87;"> Hur får jag värden att renovera min lägenhet</h3>
+
+            <p style="font-weight:bold; color:#005a87;"> Behöver vardagsrummet målas om eller plastmattan i hallen bytas ut? En härlig del av att vara hyresgäst är att du inte behöver göra sådant själv. Du ringer till hyresvärden. Läs våra tips om hur du bäst framför din önskan och hur du kan få hjälp så fort som möjligt.</p>
+        </Column>
+
+        <div>
+            <h3 style="color:#005a87;">Vad har jag rätt till?</h3>
+            Du har rätt till underhåll i din lägenhet. Ibland har vi kommit överens med fastighetsägarna om hur ofta lägenheterna ska underhållas.
+            Här är några exempel på saker som räknas som underhåll:
+
+            <Accordion>
+                <Collapse Visible="@collapse1Visible">
+                    <CollapseHeader>                       målning av väggar och tak                    </CollapseHeader>
+                    <CollapseHeader>                       målning av snickerier                    </CollapseHeader>
+                    <CollapseHeader>                       tapetsering av väggar                    </CollapseHeader>
+                    <CollapseHeader>                       byte av plastmatta                   </CollapseHeader>
+                    <CollapseHeader>                       slipning av parkett                    </CollapseHeader>
+                    <CollapseHeader>                       byte av vitvaror i köket                  </CollapseHeader>
+
+                </Collapse>
+
+            </Accordion>
+        </div>
+
+        <div class="mt-2">
+            <h3 style="color:#005a87;"> Hur gör jag om det är tid för underhåll?</h3>
+            <p>Skriv en lista på vad som behöver göras i lägenheten, rum för rum. </p>
+            <p>Skriv även en lista för de gemensamma ytorna i huset, om du tycker att något behöver åtgärdas. Till exempel tvättstugan.</p>
+            <p> Var så konkret som möjligt.</p>
+            <p>Ta reda på när senaste underhållet gjordes.</p>
+            <p> Kontakta hyresvärden - berätta vad du tycker ska göras, skicka över din lista.</p>
+            <p> Kom överens med värden om vilket underhåll som ska göra och när det ska vara klart. </p>
+            <p> Överenskommelsen ska helst vara skriftlig.</p>
+            <p> Om du inte kommer överens med värden, berätta att hen är bunden  av ett avtal.</p>
+            <p>Räcker inte det, så hör av dig till oss.</p>
+        </div>
+
+        <div class="mt-2">
+            <h2 style="color:#005a87;"> Felanmälan</h2>
+            <p>
+                Så fort du upptäcker att något är trasigt i din bostad bör du anmäla det till din hyresvärd eller fastighetsförvaltare. Hen ska genast ta hand om din felanmälan och åtgärda felet. Felanmälan kan till exempel handla om:
+            </p>
+            <Accordion>
+                <Collapse Visible="@collapse1Visible">
+                    <CollapseHeader>                        en droppande kran                    </CollapseHeader>
+                    <CollapseHeader>                        ett trasigt element                  </CollapseHeader>
+                    <CollapseHeader>                      en trasig tvättmaskin i tvättstugan     </CollapseHeader>
+
+                </Collapse>
+
+            </Accordion>
+            <p>
+                Som medlem i SPGföreningen kan du alltid kontakta oss om du vill ha mer information.
+            </p>
+        </div>
+    </Column>
+</Container>
+
+
+
+    
+@code{
+
+    bool collapse1Visible = true;
+    
+}
+

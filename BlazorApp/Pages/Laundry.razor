@@ -1,0 +1,218 @@
+﻿@page "/laundry"
+@using BlazorApp.Data
+<Auth />
+<Container >
+    <h1 class="blue-text" >Boka tvättstuga</h1>
+
+
+    <div class="form-group mt-5">
+        <select class="form-control" style="width:auto;" id="c-dropdown" @onchange="LoadCalender">
+            <option disabled selected hidden> Välj månad här..</option>
+            @foreach (string monthName in monthNames)
+            {
+                <option>@monthName</option>
+            }
+        </select>
+    </div>
+
+
+
+
+    <div>
+        <h1 class="blue-text calender-current-month"  >@DisplayCurrentMonth()</h1>
+    </div>
+
+    <div class="row">
+        <div class="date" style="overflow-x:auto;">
+            <table class="table table-bordered border-primary table-striped mt-4 col-8" style="width:auto;">
+                <thead class="calender-background" style="font-size: 20px; color:#FFFFFF;">
+                    <tr>
+                        @for (var dayIndex = 0; dayIndex < days.Count(); dayIndex++)
+                        {
+                            <th class="text-center">
+                                @days[dayIndex]
+
+                            </th>
+                        }
+
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var weekIndex = 0; weekIndex < weeks.Count(); weekIndex++)
+                    {
+                        <tr>
+                            @for (var dayIndex = 0; dayIndex < weeks[weekIndex].Dates.Count(); dayIndex++)
+                            {
+                                var wIndex = weekIndex;
+                                var dIndex = dayIndex;
+                                <td>
+                                    <label class="d-flex justify-content-center" style="font-size:40px; font-weight:bold;">@weeks[weekIndex].Dates[dayIndex].DateValue</label>
+                                    <br /><br />
+                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#laundryModal-@weeks[weekIndex].Dates[dayIndex].DateValue">@firstTime</button>
+                                    <br /><br />
+                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#laundryModal2-@weeks[weekIndex].Dates[dayIndex].DateValue">@secondTime</button>
+
+                                    @*<label style="color:#c00; font-weight:bold">@weeks[weekIndex].Dates[dayIndex].Note</label>
+                                    <br /><br />
+                                    CellNumber : [@weekIndex, @dayIndex]*@
+                                </td>
+
+
+
+
+
+
+                            }
+                        </tr>
+
+                    }
+                </tbody>
+
+            </table>
+            </div>
+            @for (var weekIndex = 0; weekIndex < weeks.Count(); weekIndex++)
+            {
+                @for (var dayIndex = 0; dayIndex < weeks[weekIndex].Dates.Count(); dayIndex++)
+                {
+                    <div class="modal fade" id="laundryModal-@weeks[weekIndex].Dates[dayIndex].DateValue" tabindex="-1" role="dialog" aria-labelledby="laundryModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h3 class="modal-title blue-text">Detaljer</h3>
+                                </div>
+                                <div class="modal-body">
+                                    @*<p><span class="bold-text mb-2">Id:</span> @_errorReport.Id</p>*@
+                                    <p><span class="bold-text mb-2">Datum:</span> @weeks[weekIndex].Dates[dayIndex].DateValue @DisplayCurrentMonth()</p>
+                                    <p><span class="bold-text">Tid:</span> @firstTime  </p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="modal-btn" data-bs-dismiss="modal">Stäng</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="laundryModal2-@weeks[weekIndex].Dates[dayIndex].DateValue" tabindex="-1" role="dialog" aria-labelledby="laundryModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h3 class="modal-title blue-text">Detaljer</h3>
+                                </div>
+                                <div class="modal-body">
+                                    @*<p><span class="bold-text mb-2">Id:</span> @_errorReport.Id</p>*@
+                                    <p><span class="bold-text mb-2">Datum:</span> @weeks[weekIndex].Dates[dayIndex].DateValue @DisplayCurrentMonth()</p>
+                                    <p><span class="bold-text">Tid:</span> @secondTime  </p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="modal-btn" data-bs-dismiss="modal">Stäng</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+
+
+
+            <div class="calender-bokningar col-2 justify-content-center mt-4">
+                <div style="font-size:20px; font-weight:bold;">Dina bokningar:</div>
+                <div class="mt-3 calender-bokningar-tid">
+                    <p>2021-06-08</p>
+                    <p>14:00 - 20:00</p>
+                </div>
+            </div>
+        </div>
+
+
+
+</Container>
+
+
+@code {
+    
+    List<string> monthNames = new List<string>();
+    List<string> days = new List<string>();
+    List<WeekClass> weeks = new List<WeekClass>();
+    DateTime startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+    DateTime endDate = (new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1)).AddMonths(1).AddDays(-1);
+
+    private string firstTime = "08:00-14:00";
+    private string secondTime = "14:00-20:00";
+
+    private string DisplayCurrentMonth()
+    {
+        var placeholderDate = startDate.ToString("MMMM");
+        return placeholderDate;
+    }
+
+
+
+    protected override void OnInitialized()
+    {
+        monthNames = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.MonthGenitiveNames.ToList();
+        GenerateCalenderHead();
+        GenerateCalenderHeadBody();
+    }
+
+    private void LoadCalender(ChangeEventArgs e)
+    {
+        var month = e.Value.ToString();
+        int monthIndex = DateTime.ParseExact(month, "MMMM", System.Globalization.CultureInfo.CreateSpecificCulture("sv-SE")).Month;
+        startDate = new DateTime(DateTime.Now.Year, monthIndex, 1);
+        endDate = (new DateTime(DateTime.Now.Year, monthIndex, 1)).AddMonths(1).AddDays(-1);
+
+        GenerateCalenderHead();
+        GenerateCalenderHeadBody();
+    }
+    private void GenerateCalenderHead()
+    {
+        var day1 = new List<string>();
+        for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
+        {
+            day1.Add(dt.ToString("dddd"));
+        }
+        days = day1.Distinct().ToList();
+    }
+    private void GenerateCalenderHeadBody()
+    {
+        weeks = new List<WeekClass>();
+
+        int flag = 0;
+        WeekClass week = new WeekClass();
+        List<DayEvent> dates = new List<DayEvent>();
+        var totalDays = (int)(endDate - startDate).TotalDays;
+        int countDays = 0;
+
+        for (var dt = startDate; dt <= endDate; dt = dt.AddDays(1))
+        {
+            flag++;
+
+            dates.Add(new DayEvent()
+            {
+                DateValue = dt.ToString("dd"),
+                DayName = dt.ToString("dddd")
+            });
+
+            if (flag == 7)
+            {
+                week = new WeekClass();
+                week.Dates = dates;
+                weeks.Add(week);
+
+                dates = new List<DayEvent>();
+                flag = 0;
+            }
+
+            if (countDays == totalDays)
+            {
+                week = new WeekClass();
+                week.Dates = dates;
+                weeks.Add(week);
+                break;
+            }
+
+            countDays++;
+        }
+    }
+
+}

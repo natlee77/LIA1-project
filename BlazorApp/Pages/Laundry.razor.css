@@ -1,0 +1,66 @@
+﻿.blue-text {
+    color: #007cba;
+    font-size: 40px;
+}
+
+.calender-background {
+    background-color: #007cba;
+}
+
+.table {
+    box-shadow: 0px 0px 36px 15px rgba(0, 0, 0, 0.28);
+}
+
+.calender-bokningar {
+    text-align: center;
+}
+
+.calender-bokningar-tid {
+    border: 1px solid transparent;
+    background: #007cba;
+}
+
+.calender-bokningar p {
+    padding: 0;
+    margin: 0;
+    font-size: 18px;
+    color: #FFFFFF;
+}
+
+.calender-current-month {
+    margin-top:2rem;
+}
+
+.modal-btn {
+    border: none;
+    background-color: #007cba;
+    color: white;
+    font-size: 18px;
+    border-radius: 50px;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    width: 10rem;
+}
+
+    .modal-btn:hover {
+        background-color: #005a87;
+    }
+ 
+@media (max-width:769px) {
+    .date {
+        -moz-transform: scale( 0.5, 0.5);
+        zoom: 0.5;
+        zoom: 50%;
+    }
+
+    .calender-bokningar {
+        width: auto;
+    }
+
+   .green   {
+        width: auto;
+    }
+    .blue-text {
+        font-size:30px;
+    }
+}

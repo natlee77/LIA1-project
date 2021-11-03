@@ -1,0 +1,101 @@
+﻿@page "/errorreport"
+@inject HttpClient Http
+
+<Auth />
+<Container>
+    <h2 class="mb-5 blue-text">Felanmälan</h2>
+
+    <h3 class="mb-3">Gör en ny felanmälan</h3>
+
+    <EditForm Model="@_errorReport" OnSubmit="@SubmitErrorReportAsync">
+        <div class="mb-3">
+            <select class="form-select mb-3" aria-label="Default select example" required @bind="_errorReport.Categorie">
+                <option selected>Välj kategori</option>
+                <option value="Bostad">Bostad</option>
+                <option value="Trapphus">Trapphus</option>
+                <option value="Övrigt">Övrigt</option>
+            </select>
+            <label for="errorReportDescription" class="form-label">Beskrivning av felet</label>
+            <textarea class="form-control" id="errorReportDescription" rows="3" @bind="_errorReport.Description"></textarea>
+        </div>
+        <button type="submit" class="submit-btn">Skicka in felanmälan</button>
+    </EditForm>
+
+    <h3 class="mt-5 mb-3">Aktuella felanmälningar</h3>
+
+    @if (_errorReports.Count == 0)
+    {
+        <p>Inga aktuella felanmälningar</p>
+    }
+    else
+    {
+        @foreach (var _errorReport in _errorReports)
+        {
+            <div class="error-report d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex">
+                    <div class="me-5">
+                        <p class="gray-text mb-1">Datum</p>
+                        <p class="gray-text bold-text mt-1">@_errorReport.ErrorDate</p>
+                    </div>
+                    <div class="ms-5 me-5">
+                        <p class="gray-text mb-1">Kategori</p>
+                        <p class="gray-text bold-text mt-1">@_errorReport.Categorie</p>
+                    </div>
+                    <div class="ms-5 me-5">
+                        <p class="gray-text mb-1">Beskrivning</p>
+                        <p class="gray-text bold-text mt-1">@_errorReport.Description</p>
+                    </div>
+                </div>
+                <button type="button" class="details-btn" data-bs-toggle="modal" data-bs-target="#errorReportModal-@_errorReport.Id">Detaljer</button>
+            </div>
+
+            <!-- Modal -->
+            <div class="modal fade" id="errorReportModal-@_errorReport.Id" tabindex="-1" aria-labelledby="errorReportModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title blue-text">Detaljer</h3>
+                        </div>
+                        <div class="modal-body">
+                            <p><span class="bold-text mb-2">Id:</span> @_errorReport.Id</p>
+                            <p><span class="bold-text mb-2">Datum:</span> @_errorReport.ErrorDate</p>
+                            <p><span class="bold-text mb-2">Kategori:</span> @_errorReport.Categorie</p>
+                            <p><span class="bold-text">Beskrivning:</span> @_errorReport.Description</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="modal-btn" data-bs-dismiss="modal">Stäng</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</Container>
+@code {
+    private ErrorReportModel _errorReport;
+    private List<ErrorReportModel> _errorReports = new List<ErrorReportModel>();
+
+    private async Task SubmitErrorReportAsync()
+    {
+        _errorReport.ErrorDate = DateTime.Now;
+        var _userIdString = await sessionStorage.GetItemAsync<string>("UserId");
+        int _userId = Int32.Parse(_userIdString);
+        _errorReport.UserId = _userId;
+        await Http.PostAsJsonAsync<ErrorReportModel>("https://localhost:44343/api/ErrorReports", _errorReport);
+        await GetErrorReportsAsync();
+        _errorReport = new ErrorReportModel();
+    }
+
+    private async Task GetErrorReportsAsync()
+    {
+        var _userId = await sessionStorage.GetItemAsync<string>("UserId");
+        _errorReports = await Http.GetFromJsonAsync<List<ErrorReportModel>>($"https://localhost:44343/api/ErrorReports/User/{_userId}");
+        _errorReports.Reverse();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _errorReport = new ErrorReportModel();
+        await GetErrorReportsAsync();
+    }
+}
